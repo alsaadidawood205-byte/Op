@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>System Error</title>
+    <style>
+        body {
+            background-color: black;
+            color: #0f0; /* لون أخضر هكرز */
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #warning {
+            color: red;
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #terminal {
+            width: 80%;
+            height: 300px;
+            overflow: hidden;
+            border: 1px solid #333;
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+        /* إخفاء الصفحة بعد النهاية */
+        .hidden { display: none !important; }
+        
+        .success-msg {
+            color: white;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="prank-container">
+        <div id="warning">WARNING: SYSTEM VIRUS DETECTED!</div>
+        <div id="terminal"></div>
+    </div>
+
+    <div id="final-msg" class="hidden">
+        <div class="success-msg">
+            تعيش وتأكل غيرها! 😂<br>
+            كان مجرد مقلب بسيط من مهند.
+        </div>
+    </div>
+
+    <script>
+        const terminal = document.getElementById('terminal');
+        const container = document.getElementById('prank-container');
+        const finalMsg = document.getElementById('final-msg');
+
+        // مصفوفة نصوص عشوائية لتبدو كاختراق
+        const lines = [
+            "Connecting to server...", "Bypassing firewall...", 
+            "Accessing private photos...", "Uploading data to remote server...",
+            "Deleting System32...", "Infecting Kernel...", 
+            "Extracting passwords...", "IP Address: 192.168.1.105"
+        ];
+
+        // إضافة أسطر بسرعة
+        let interval = setInterval(() => {
+            let p = document.createElement('p');
+            p.textContent = "> " + lines[Math.floor(Math.random() * lines.length)] + " [OK]";
+            terminal.appendChild(p);
+            terminal.scrollTop = terminal.scrollHeight;
+        }, 100);
+
+        // بعد 10 ثوانٍ يختفي كل شيء ويظهر المقلب
+        setTimeout(() => {
+            clearInterval(interval);
+            container.classList.add('hidden'); // إخفاء المظهر المرعب
+            finalMsg.classList.remove('hidden'); // إظهار رسالة المقلب
+        }, 10000); // 10000 مللي ثانية = 10 ثوانٍ
+    </script>
+
+</body>
+</html>
+
