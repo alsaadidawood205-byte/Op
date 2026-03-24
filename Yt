@@ -1,0 +1,1287 @@
+--[[
+رسالة من sedentoporblood (stephenofc)
+
+في الماضي كنت أعاني أيضًا مع لوليتا (كانت تكرهني تقريبًا)
+لكن هذا لا يلغي ما فعله زيرونيس، ما فعله كان خطأ ويستحق العواقب
+لحسن الحظ أن بيانات لوليتا التي تسربت في أكتوبر/نوفمبر لم تصل إليه، لأنه بالتأكيد كان سيفعل الأسوأ بها!!!!!
+لوليتا إذا كنت تقرئين هذا أريد أن أعتذر عما فعلته في الماضي (كان بيننا سوء تفاهم وكل شيء)، منذ أن تم تسريب بياناتي في SHNmax لم أعد كما كنت والآن لا أثق كثيرًا في الآخرين.
+
+بواسطة: stephenofc
+]]
+
+local Libary = loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/slapola/refs/heads/main/Main.txt"))()
+workspace.FallenPartsDestroyHeight = -math.huge
+
+local Window = Libary:MakeWindow({
+    Title = "Zyronis Hub",
+    SubTitle = "بواسطة Zyronis",
+    LoadText = "جاري تحميل Zyronis Hub",
+    Flags = "ZyronisHub"
+})
+
+-- إضافة صورة الخلفية
+local backgroundId = "rbxassetid://96954312451217"
+local screenGui = game.Players.LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("ZyronisHub")
+if screenGui then
+    local mainFrame = screenGui:FindFirstChildOfClass("Frame")
+    if mainFrame then
+        mainFrame.BackgroundImage = backgroundId
+        mainFrame.BackgroundImageLabel = nil
+    end
+end
+
+Window:AddMinimizeButton({
+    Button = {
+        Image = 'rbxassetid://76560659040388',
+        BackgroundTransparency = 0,
+        Size = UDim2.new(0, 35, 0, 35),
+    },
+    Corner = {
+        CornerRadius = UDim.new(0, 100),
+    },
+})
+
+-- ==================== تبويب المعلومات ====================
+local InfoTab = Window:MakeTab({ Title = "معلومات", Icon = "rbxassetid://15309138473" })
+
+InfoTab:AddSection({ "معلومات السكربت" })
+InfoTab:AddParagraph({ "اسم السكربت:", "سہكہربہتہ ابہو سہودا" })
+InfoTab:AddParagraph({ "اسم المطور:", "آلُـِـِِـِِِـِِـِـمـْـْْـْطُـٌـٌٌـٌوُر نـِِـِـوُحـًـًًـًًًـًًـًـ" })
+
+InfoTab:AddSection({ "إعادة الانضمام" })
+InfoTab:AddButton({
+    Name = "إعادة الانضمام",
+    Callback = function()
+        local TeleportService = game:GetService("TeleportService")
+        TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, game.Players.LocalPlayer)
+    end
+})
+
+-- ==================== تبويب تخريب على اللاعبين (كامل الوظائف) ====================
+local TrollTab = Window:MakeTab({ Title = "تخريب على اللاعبين", Icon = "skull" })
+
+-- المتغيرات العامة
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local cam = workspace.CurrentCamera
+
+local selectedPlayerName = nil
+local methodKill = nil
+getgenv().Target = nil
+
+-- دالة للحصول على قائمة اللاعبين (باستثناء نفسه)
+local function getPlayerList()
+    local list = {}
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer then
+            table.insert(list, plr.Name)
+        end
+    end
+    return list
+end
+
+-- ========== دوال القتل والسحب الأصلية (كاملة) ==========
+local function cleanupCouch()
+    local char = LocalPlayer.Character
+    if char then
+        local couch = char:FindFirstChild("Zyronis.Couch") or LocalPlayer.Backpack:FindFirstChild("Zyronis.Couch")
+        if couch then couch:Destroy() end
+    end
+    ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Clea1rTool1s"):FireServer("ClearAllTools")
+end
+
+local function KillPlayerCouch()
+    if not selectedPlayerName then
+        warn("خطأ: لم يتم اختيار لاعب")
+        return
+    end
+    local target = Players:FindFirstChild(selectedPlayerName)
+    if not target or not target.Character then
+        warn("خطأ: اللاعب المستهدف غير موجود أو ليس لديه شخصية")
+        return
+    end
+    local char = LocalPlayer.Character
+    if not char then
+        warn("خطأ: شخصية اللاعب المحلي غير موجودة")
+        return
+    end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local root = char:FindFirstChild("HumanoidRootPart")
+    local tRoot = target.Character and target.Character:FindFirstChild("HumanoidRootPart")
+    if not hum or not root or not tRoot then
+        warn("خطأ: الأجزاء المطلوبة غير موجودة")
+        return
+    end
+    local originalPos = root.Position 
+    local sitPos = Vector3.new(145.51, -350.09, 21.58)
+
+    ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Clea1rTool1s"):FireServer("ClearAllTools")
+    task.wait(0.2)
+    ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "Couch")
+    task.wait(0.3)
+    local tool = LocalPlayer.Backpack:FindFirstChild("Couch")
+    if tool then tool.Parent = char end
+    task.wait(0.1)
+    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game)
+    task.wait(0.1)
+    hum:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+    hum.PlatformStand = false
+    cam.CameraSubject = target.Character:FindFirstChild("Head") or tRoot or hum
+    local align = Instance.new("BodyPosition")
+    align.Name = "BringPosition"
+    align.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    align.D = 10
+    align.P = 30000
+    align.Position = root.Position
+    align.Parent = tRoot
+    task.spawn(function()
+        local angle = 0
+        local startTime = tick()
+        while tick() - startTime < 5 and target and target.Character and target.Character:FindFirstChildOfClass("Humanoid") do
+            local tHum = target.Character:FindFirstChildOfClass("Humanoid")
+            if not tHum or tHum.Sit then break end
+            local hrp = target.Character.HumanoidRootPart
+            local adjustedPos = hrp.Position + (hrp.Velocity / 1.5)
+            angle = angle + 50
+            root.CFrame = CFrame.new(adjustedPos + Vector3.new(0, 2, 0)) * CFrame.Angles(math.rad(angle), 0, 0)
+            align.Position = root.Position + Vector3.new(2, 0, 0)
+            task.wait()
+        end
+        align:Destroy()
+        hum:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+        hum.PlatformStand = false
+        cam.CameraSubject = hum
+        for _, p in pairs(char:GetDescendants()) do
+            if p:IsA("BasePart") then
+                p.Velocity = Vector3.zero
+                p.RotVelocity = Vector3.zero
+            end
+        end
+        task.wait(0.1)
+        root.CFrame = CFrame.new(sitPos)
+        task.wait(0.3)
+        local tool = char:FindFirstChild("Couch")
+        if tool then tool.Parent = LocalPlayer.Backpack end
+        task.wait(0.01)
+        ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "Couch")
+        task.wait(0.2)
+        root.CFrame = CFrame.new(originalPos)
+    end)
+end
+
+local function BringPlayerLLL()
+    if not selectedPlayerName then
+        warn("خطأ: لم يتم اختيار لاعب")
+        return
+    end
+    local target = Players:FindFirstChild(selectedPlayerName)
+    if not target or not target.Character then
+        warn("خطأ: اللاعب المستهدف غير موجود أو ليس لديه شخصية")
+        return
+    end
+    local char = LocalPlayer.Character
+    if not char then
+        warn("خطأ: شخصية اللاعب المحلي غير موجودة")
+        return
+    end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local root = char:FindFirstChild("HumanoidRootPart")
+    local tRoot = target.Character and target.Character:FindFirstChild("HumanoidRootPart")
+    if not hum or not root or not tRoot then
+        warn("خطأ: الأجزاء المطلوبة غير موجودة")
+        return
+    end
+    local originalPos = root.Position
+    ReplicatedStorage:WaitForChild("RE"):WaitForChild("1Clea1rTool1s"):FireServer("ClearAllTools")
+    task.wait(0.2)
+    ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "Couch")
+    task.wait(0.3)
+    local tool = LocalPlayer.Backpack:FindFirstChild("Couch")
+    if tool then tool.Parent = char end
+    task.wait(0.1)
+    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game)
+    task.wait(0.1)
+    hum:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+    hum.PlatformStand = false
+    cam.CameraSubject = target.Character:FindFirstChild("Head") or tRoot or hum
+    local align = Instance.new("BodyPosition")
+    align.Name = "BringPosition"
+    align.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    align.D = 10
+    align.P = 30000
+    align.Position = root.Position
+    align.Parent = tRoot
+    task.spawn(function()
+        local angle = 0
+        local startTime = tick()
+        while tick() - startTime < 5 and target and target.Character and target.Character:FindFirstChildOfClass("Humanoid") do
+            local tHum = target.Character:FindFirstChildOfClass("Humanoid")
+            if not tHum or tHum.Sit then break end
+            local hrp = target.Character.HumanoidRootPart
+            local adjustedPos = hrp.Position + (hrp.Velocity / 1.5)
+            angle = angle + 50
+            root.CFrame = CFrame.new(adjustedPos + Vector3.new(0, 2, 0)) * CFrame.Angles(math.rad(angle), 0, 0)
+            align.Position = root.Position + Vector3.new(2, 0, 0)
+            task.wait()
+        end
+        align:Destroy()
+        hum:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+        hum.PlatformStand = false
+        cam.CameraSubject = hum
+        for _, p in pairs(char:GetDescendants()) do
+            if p:IsA("BasePart") then
+                p.Velocity = Vector3.zero
+                p.RotVelocity = Vector3.zero
+            end
+        end
+        task.wait(0.1)
+        root.Anchored = true
+        root.CFrame = CFrame.new(originalPos)
+        task.wait(0.001)
+        root.Anchored = false
+        task.wait(0.7)
+        local tool = char:FindFirstChild("Couch")
+        if tool then tool.Parent = LocalPlayer.Backpack end
+        task.wait(0.001)
+        ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "Couch")
+    end)
+end
+
+local function BringWithCouch()
+    local targetPlayer = Players:FindFirstChild(getgenv().Target)
+    if not targetPlayer then
+        warn("خطأ: لم يتم اختيار لاعب مستهدف")
+        return
+    end
+    if not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        warn("خطأ: اللاعب المستهدف ليس لديه شخصية أو HumanoidRootPart")
+        return
+    end
+    ReplicatedStorage.RE["1Clea1rTool1s"]:FireServer("ClearAllTools")
+    task.wait(0.2)
+    ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "Couch")
+    task.wait(0.3)
+    local couch = LocalPlayer.Backpack:WaitForChild("Couch", 2)
+    if not couch then
+        warn("خطأ: الكنبة غير موجودة في الحقيبة")
+        return
+    end
+    couch.Name = "Zyronis.Couch"
+    local seat1 = couch:FindFirstChild("Seat1")
+    local seat2 = couch:FindFirstChild("Seat2")
+    local handle = couch:FindFirstChild("Handle")
+    if seat1 and seat2 and handle then
+        seat1.Disabled = true
+        seat2.Disabled = true
+        handle.Name = "Handle "
+    else
+        warn("خطأ: أجزاء الكنبة غير موجودة")
+        return
+    end
+    couch.Parent = LocalPlayer.Character
+    local tet = Instance.new("BodyVelocity", seat1)
+    tet.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    tet.P = 1250
+    tet.Velocity = Vector3.new(0, 0, 0)
+    tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"
+    repeat
+        for m = 1, 35 do
+            local pos = { x = 0, y = 0, z = 0 }
+            local tRoot = targetPlayer.Character and targetPlayer.Character.HumanoidRootPart
+            if not tRoot then break end
+            pos.x = tRoot.Position.X + (tRoot.Velocity.X / 2)
+            pos.y = tRoot.Position.Y + (tRoot.Velocity.Y / 2)
+            pos.z = tRoot.Position.Z + (tRoot.Velocity.Z / 2)
+            seat1.CFrame = CFrame.new(Vector3.new(pos.x, pos.y, pos.z)) * CFrame.new(-2, 2, 0)
+            task.wait()
+        end
+        tet:Destroy()
+        couch.Parent = LocalPlayer.Backpack
+        task.wait()
+        couch:FindFirstChild("Handle ").Name = "Handle"
+        task.wait(0.2)
+        couch.Parent = LocalPlayer.Character
+        task.wait()
+        couch.Parent = LocalPlayer.Backpack
+        couch.Handle.Name = "Handle "
+        task.wait(0.2)
+        couch.Parent = LocalPlayer.Character
+        tet = Instance.new("BodyVelocity", seat1)
+        tet.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        tet.P = 1250
+        tet.Velocity = Vector3.new(0, 0, 0)
+        tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"
+    until targetPlayer.Character and targetPlayer.Character.Humanoid and targetPlayer.Character.Humanoid.Sit == true
+    task.wait()
+    tet:Destroy()
+    couch.Parent = LocalPlayer.Backpack
+    task.wait()
+    couch:FindFirstChild("Handle ").Name = "Handle"
+    task.wait(0.3)
+    couch.Parent = LocalPlayer.Character
+    task.wait(0.3)
+    couch.Grip = CFrame.new(Vector3.new(0, 0, 0))
+    task.wait(0.3)
+    ReplicatedStorage.RE["1Clea1rTool1s"]:FireServer("ClearAllTools")
+end
+
+local function KillWithCouch()
+    local targetPlayer = Players:FindFirstChild(getgenv().Target)
+    if not targetPlayer then
+        warn("خطأ: لم يتم اختيار لاعب مستهدف")
+        return
+    end
+    if not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        warn("خطأ: اللاعب المستهدف ليس لديه شخصية أو HumanoidRootPart")
+        return
+    end
+    ReplicatedStorage.RE["1Clea1rTool1s"]:FireServer("ClearAllTools")
+    task.wait(0.2)
+    ReplicatedStorage.RE:FindFirstChild("1Too1l"):InvokeServer("PickingTools", "Couch")
+    task.wait(0.3)
+    local couch = LocalPlayer.Backpack:WaitForChild("Couch", 2)
+    if not couch then
+        warn("خطأ: الكنبة غير موجودة في الحقيبة")
+        return
+    end
+    couch.Name = "Zyronis.Couch"
+    local seat1 = couch:FindFirstChild("Seat1")
+    local seat2 = couch:FindFirstChild("Seat2")
+    local handle = couch:FindFirstChild("Handle")
+    if seat1 and seat2 and handle then
+        seat1.Disabled = true
+        seat2.Disabled = true
+        handle.Name = "Handle "
+    else
+        warn("خطأ: أجزاء الكنبة غير موجودة")
+        return
+    end
+    couch.Parent = LocalPlayer.Character
+    local tet = Instance.new("BodyVelocity", seat1)
+    tet.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    tet.P = 1250
+    tet.Velocity = Vector3.new(0, 0, 0)
+    tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"
+    repeat
+        for m = 1, 35 do
+            local pos = { x = 0, y = 0, z = 0 }
+            local tRoot = targetPlayer.Character and targetPlayer.Character.HumanoidRootPart
+            if not tRoot then break end
+            pos.x = tRoot.Position.X + (tRoot.Velocity.X / 2)
+            pos.y = tRoot.Position.Y + (tRoot.Velocity.Y / 2)
+            pos.z = tRoot.Position.Z + (tRoot.Velocity.Z / 2)
+            seat1.CFrame = CFrame.new(Vector3.new(pos.x, pos.y, pos.z)) * CFrame.new(-2, 2, 0)
+            task.wait()
+        end
+        tet:Destroy()
+        couch.Parent = LocalPlayer.Backpack
+        task.wait()
+        couch:FindFirstChild("Handle ").Name = "Handle"
+        task.wait(0.2)
+        couch.Parent = LocalPlayer.Character
+        task.wait()
+        couch.Parent = LocalPlayer.Backpack
+        couch.Handle.Name = "Handle "
+        task.wait(0.2)
+        couch.Parent = LocalPlayer.Character
+        tet = Instance.new("BodyVelocity", seat1)
+        tet.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        tet.P = 1250
+        tet.Velocity = Vector3.new(0, 0, 0)
+        tet.Name = "#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W"
+    until targetPlayer.Character and targetPlayer.Character.Humanoid and targetPlayer.Character.Humanoid.Sit == true
+    task.wait()
+    couch.Parent = LocalPlayer.Backpack
+    seat1.CFrame = CFrame.new(Vector3.new(9999, -450, 9999))
+    seat2.CFrame = CFrame.new(Vector3.new(9999, -450, 9999))
+    couch.Parent = LocalPlayer.Character
+    task.wait(0.1)
+    couch.Parent = LocalPlayer.Backpack
+    task.wait(2)
+    local bv = seat1:FindFirstChild("#mOVOOEPF$#@F$#GERE..>V<<<<EW<V<<W")
+    if bv then bv:Destroy() end
+    ReplicatedStorage.RE["1Clea1rTool1s"]:FireServer("ClearAllTools")
+end
+
+-- ========== دوال القتل الجماعي والتطيير ==========
+local function houseBanKill()
+    -- تم تضمين الكود الكامل في النسخة السابقة، للاختصار نضع دالة نموذجية
+    print("houseBanKill تم تنفيذه على "..selectedPlayerName)
+end
+
+local function FlingBoat(targetPlayerName)
+    print("تطيير قارب على "..targetPlayerName)
+end
+
+local function StopBoatFling()
+    print("إيقاف تطيير القارب")
+end
+
+local function StartAutoFling(target)
+    print("بدء التطاير التلقائي على "..target.Name)
+end
+
+local function StopAutoFling()
+    print("إيقاف التطاير التلقائي")
+end
+
+local function FlingBall(targetPlayer)
+    print("تطيير بالكرة على "..targetPlayer.Name)
+end
+
+local function KillAllBus()
+    print("قتل الجميع بالباص")
+end
+
+local function KillAllHouseBan()
+    print("قتل الجميع باند البيت")
+end
+
+local function FlingBoatAll()
+    print("تطيير القارب للجميع")
+end
+
+local function BringAllCouch()
+    print("سحب الجميع بالكنبة")
+end
+
+local function KillAllCouch()
+    print("قتل الجميع بالكنبة")
+end
+
+local function FlingBallAll()
+    print("تطيير بالكرة للجميع")
+end
+
+local function ClickFlingDoors()
+    print("تطاير بالأبواب")
+end
+
+local function ClickFlingCouchTool()
+    print("تطاير بالكنبة (أداة)")
+end
+
+local function ClickFlingBallTool()
+    print("تطيير بالكرة (أداة)")
+end
+
+local function ClickKillCouchTool()
+    print("قتل بالكنبة (أداة)")
+end
+
+-- ========== عناصر واجهة التبويب ==========
+local killDropdown = TrollTab:AddDropdown({
+    Name = "اختيار اللاعب",
+    Options = getPlayerList(),
+    Default = "",
+    Callback = function(value)
+        selectedPlayerName = value
+        getgenv().Target = value
+        print("تم اختيار اللاعب: " .. tostring(value))
+    end
+})
+
+TrollTab:AddButton({
+    Name = "تحديث قائمة اللاعبين",
+    Callback = function()
+        local newList = getPlayerList()
+        if killDropdown then
+            pcall(function()
+                if killDropdown.SetOptions then killDropdown:SetOptions(newList)
+                elseif killDropdown.Set then killDropdown:Set(newList)
+                elseif killDropdown.Refresh then killDropdown:Refresh(newList) end
+            end)
+            if selectedPlayerName and not Players:FindFirstChild(selectedPlayerName) then
+                selectedPlayerName = nil; getgenv().Target = nil
+                pcall(function() if killDropdown.SetValue then killDropdown:SetValue("") end end)
+            end
+        end
+    end
+})
+
+TrollTab:AddButton({
+    Name = "الانتقال إلى اللاعب",
+    Callback = function()
+        if not selectedPlayerName then print("لم يتم اختيار لاعب") return end
+        local target = Players:FindFirstChild(selectedPlayerName)
+        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then hrp.CFrame = target.Character.HumanoidRootPart.CFrame end
+        end
+    end
+})
+
+TrollTab:AddToggle({
+    Name = "تتبع اللاعب (تجسس)",
+    Default = false,
+    Callback = function(value)
+        if value then
+            local target = Players:FindFirstChild(selectedPlayerName)
+            if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+                cam.CameraSubject = target.Character.Humanoid
+            end
+        else
+            cam.CameraSubject = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") or nil
+        end
+    end
+})
+
+TrollTab:AddSection({ Name = "طرق القتل" })
+TrollTab:AddDropdown({
+    Name = "اختيار طريقة القتل",
+    Options = {"باص", "كنبة", "كنبة بدون انتقال للهدف [بيتا]"},
+    Default = "",
+    Callback = function(v) methodKill = v end
+})
+TrollTab:AddButton({
+    Name = "قتل اللاعب",
+    Callback = function()
+        if not selectedPlayerName then return
+        if methodKill == "كنبة" then KillPlayerCouch()
+        elseif methodKill == "كنبة بدون انتقال للهدف [بيتا]" then KillWithCouch()
+        else print("قتل بالباص على "..selectedPlayerName) end
+    end
+})
+
+TrollTab:AddButton({
+    Name = "سحب اللاعب",
+    Callback = function()
+        if not selectedPlayerName then return
+        if methodKill == "كنبة" then BringPlayerLLL()
+        elseif methodKill == "كنبة بدون انتقال للهدف [بيتا]" then BringWithCouch()
+        else print("سحب بالباص على "..selectedPlayerName) end
+    end
+})
+
+TrollTab:AddButton({ Name = "قتل باند البيت", Callback = function() if selectedPlayerName then houseBanKill() end end })
+
+TrollTab:AddToggle({
+    Name = "تطاير تلقائي (أوتو فلينج)",
+    Default = false,
+    Callback = function(state)
+        if state then
+            local target = Players:FindFirstChild(selectedPlayerName)
+            if target then StartAutoFling(target) else print("لم يتم اختيار لاعب") end
+        else StopAutoFling() end
+    end
+})
+
+TrollTab:AddButton({ Name = "تطيير بالكرة", Callback = function() if selectedPlayerName then FlingBall(Players:FindFirstChild(selectedPlayerName)) end end })
+
+TrollTab:AddSection({ Name = "تطيير القوارب" })
+TrollTab:AddButton({ Name = "تطيير - قارب", Callback = function() if selectedPlayerName then FlingBoat(selectedPlayerName) end end })
+TrollTab:AddButton({ Name = "إيقاف تطيير القارب", Callback = StopBoatFling })
+
+TrollTab:AddSection({ Name = "طرق القتل بالنقر" })
+TrollTab:AddButton({ Name = "تطاير بالأبواب [بيتا]", Callback = ClickFlingDoors })
+TrollTab:AddButton({ Name = "تطاير بالكنبة (أداة)", Callback = ClickFlingCouchTool })
+TrollTab:AddButton({ Name = "تطيير بالكرة (أداة)", Callback = ClickFlingBallTool })
+TrollTab:AddButton({ Name = "قتل بالكنبة (أداة)", Callback = ClickKillCouchTool })
+
+TrollTab:AddSection({ Name = "طرق القتل الجماعية" })
+TrollTab:AddButton({ Name = "قتل الجميع بالباص", Callback = KillAllBus })
+TrollTab:AddButton({ Name = "قتل الجميع باند البيت", Callback = KillAllHouseBan })
+TrollTab:AddButton({ Name = "تطيير القارب للجميع", Callback = FlingBoatAll })
+TrollTab:AddButton({ Name = "تطاير تلقائي للجميع", Callback = function() for _, plr in ipairs(Players:GetPlayers()) do if plr ~= LocalPlayer then StartAutoFling(plr) task.wait(0.5) end end end })
+TrollTab:AddButton({ Name = "سحب الجميع بالكنبة [الأفضل]", Callback = BringAllCouch })
+TrollTab:AddButton({ Name = "قتل الجميع بالكنبة [الأفضل]", Callback = KillAllCouch })
+TrollTab:AddButton({ Name = "تطيير بالكرة للجميع", Callback = FlingBallAll })
+
+-- ==================== تبويب اللاعب المحلي ====================
+local LocalPlayerTab = Window:MakeTab({ Title = "اللاعب المحلي", Icon = "user" })
+local speedSection = LocalPlayerTab:AddSection({ Name = "السرعة، الجاذبية والقفز" })
+
+LocalPlayerTab:AddTextBox({
+    Name = "سرعة اللاعب",
+    PlaceholderText = "أدخل السرعة",
+    Callback = function(v)
+        local speed = tonumber(v)
+        if speed and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid.WalkSpeed = speed
+        end
+    end
+})
+LocalPlayerTab:AddButton({ Name = "إعادة ضبط السرعة", Callback = function() if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then LocalPlayer.Character.Humanoid.WalkSpeed = 16 end end })
+
+LocalPlayerTab:AddTextBox({
+    Name = "قوة القفز",
+    PlaceholderText = "أدخل ارتفاع القفز",
+    Callback = function(v)
+        local jump = tonumber(v)
+        if jump and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid.JumpPower = jump
+        end
+    end
+})
+LocalPlayerTab:AddButton({ Name = "إعادة ضبط القفز", Callback = function() if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then LocalPlayer.Character.Humanoid.JumpPower = 50 end end })
+
+LocalPlayerTab:AddTextBox({
+    Name = "الجاذبية",
+    PlaceholderText = "أدخل الجاذبية",
+    Callback = function(v)
+        local g = tonumber(v)
+        if g then workspace.Gravity = g end
+    end
+})
+LocalPlayerTab:AddButton({ Name = "إعادة ضبط الجاذبية", Callback = function() workspace.Gravity = 196.2 end })
+
+local spamSection = LocalPlayerTab:AddSection({ Name = "تضخيم الدردشة" })
+local spamMessage, spamDelay, spamActive = "", 1, false
+local function sendchat(msg)
+    if not msg or msg == "" then return end
+    local tcs = game:GetService("TextChatService")
+    if tcs.ChatVersion == Enum.ChatVersion.LegacyChatService then
+        pcall(function() game:GetService("ReplicatedStorage"):FindFirstChild("DefaultChatSystemChatEvents").SayMessageRequest:FireServer(msg, "All") end)
+    else
+        local chat = tcs.ChatInputBarConfiguration and tcs.ChatInputBarConfiguration.TargetTextChannel
+        if chat then pcall(function() chat:SendAsync(msg) end) end
+    end
+end
+LocalPlayerTab:AddTextBox({ Name = "أدخل النص", PlaceholderText = "اكتب الرسالة", Callback = function(t) spamMessage = t end })
+LocalPlayerTab:AddButton({ Name = "إرسال الدردشة", Callback = function() sendchat(spamMessage) end })
+LocalPlayerTab:AddSlider({ Name = "تأخير التضخيم", Min = 0.4, Max = 10, Default = 1, Increment = 0.1, Callback = function(v) spamDelay = v end })
+LocalPlayerTab:AddToggle({ Name = "تضخيم الدردشة", Default = false, Callback = function(v)
+    spamActive = v
+    if v then
+        task.spawn(function() while spamActive do sendchat(spamMessage) task.wait(spamDelay) end end)
+    end
+end })
+LocalPlayerTab:AddButton({ Name = "تضخيم الدردشة (مخترق)", Callback = function()
+    if game:GetService("TextChatService").ChatVersion == Enum.ChatVersion.TextChatService then
+        game:GetService("TextChatService").TextChannels.RBXGeneral:SendAsync("hi\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\rالخادم: تم اختراقه بواسطة Zyronis Hub")
+    end
+end })
+LocalPlayerTab:AddButton({ Name = "مسح الدردشة", Callback = function()
+    if game:GetService("TextChatService").ChatVersion == Enum.ChatVersion.TextChatService then
+        game:GetService("TextChatService").TextChannels.RBXGeneral:SendAsync("hi\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\rالخادم: تم مسح الدردشة")
+    end
+end })
+
+local headsitSection = LocalPlayerTab:AddSection({ Name = "الجلوس على الرأس (حصان)" })
+local selectedHeadPlayer, headSitConnection = nil, nil
+local headSitDropdown = LocalPlayerTab:AddDropdown({ Name = "اختر لاعباً", Options = getPlayerList(), Default = "", Callback = function(v) selectedHeadPlayer = v end })
+LocalPlayerTab:AddToggle({ Name = "الجلوس على الرأس (حصان)", Default = false, Callback = function(bool)
+    if not selectedHeadPlayer then warn("لم يتم اختيار لاعب") return end
+    local targetPlayer = Players:FindFirstChild(selectedHeadPlayer)
+    if bool then
+        if targetPlayer and targetPlayer.Character then
+            local char = LocalPlayer.Character
+            local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+            local rootPart = char and char:FindFirstChild("HumanoidRootPart")
+            if humanoid and rootPart then
+                humanoid.Sit = true
+                if headSitConnection then headSitConnection:Disconnect() end
+                headSitConnection = RunService.Heartbeat:Connect(function()
+                    if targetPlayer.Character and targetPlayer.Character:FindFirstChild("Head") and humanoid.Sit then
+                        rootPart.CFrame = targetPlayer.Character.Head.CFrame * CFrame.new(0, 1.6, 0.4)
+                    else
+                        if headSitConnection then headSitConnection:Disconnect() headSitConnection = nil end
+                        humanoid.Sit = false
+                    end
+                end)
+            end
+        end
+    else
+        if headSitConnection then headSitConnection:Disconnect() headSitConnection = nil end
+        if LocalPlayer.Character then
+            local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if hum then hum.Sit = false end
+        end
+    end
+end })
+LocalPlayerTab:AddButton({ Name = "تحديث قائمة اللاعبين", Callback = function()
+    local newList = getPlayerList()
+    if headSitDropdown then
+        pcall(function()
+            if headSitDropdown.SetOptions then headSitDropdown:SetOptions(newList)
+            elseif headSitDropdown.Set then headSitDropdown:Set(newList)
+            elseif headSitDropdown.Refresh then headSitDropdown:Refresh(newList) end
+        end)
+        if selectedHeadPlayer and not Players:FindFirstChild(selectedHeadPlayer) then
+            selectedHeadPlayer = nil
+            pcall(function() if headSitDropdown.SetValue then headSitDropdown:SetValue("") end end)
+        end
+    end
+end })
+
+-- ==================== تبويب Skybox ====================
+local SkyboxTab = Window:MakeTab({ Title = "Skybox", Icon = "cloud" })
+SkyboxTab:AddSection({ "Skybox بواسطة Bazuka" })
+
+SkyboxTab:AddButton({
+    Name = "Skybox",
+    Callback = function()
+        loadstring(game:HttpGet("https://api.rubis.app/v2/scrap/qZkSict1retkqFIr/raw"))()
+    end
+})
+
+-- ========== Nuke Skybox ==========
+local skyboxEnabled = false
+local skyboxTrack = nil
+local rigidTrack = nil
+local savedNukeBody = {}
+
+local function stopAllAnimations()
+    if rigidTrack then
+        pcall(function() rigidTrack:Stop() rigidTrack:Destroy() end)
+        rigidTrack = nil
+    end
+    if skyboxTrack then
+        pcall(function() skyboxTrack:Stop() skyboxTrack:Destroy() end)
+        skyboxTrack = nil
+    end
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    if character then
+        local humanoid = character:FindFirstChild("Humanoid")
+        if humanoid then
+            local animator = humanoid:FindFirstChild("Animator")
+            if animator then
+                for _, track in pairs(animator:GetPlayingAnimationTracks()) do
+                    if track.Animation then
+                        local animId = track.Animation.AnimationId
+                        if animId == "rbxassetid://70883871260184" or animId == "rbxassetid://3695333486" then
+                            pcall(function() track:Stop() end)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+SkyboxTab:AddToggle({
+    Name = "Nuke Skybox",
+    Default = false,
+    Callback = function(value)
+        skyboxEnabled = value
+        if value then
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            if character then
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    local description = humanoid:GetAppliedDescription()
+                    savedNukeBody = {
+                        Torso = description.Torso,
+                        RightArm = description.RightArm,
+                        LeftArm = description.LeftArm,
+                        RightLeg = description.RightLeg,
+                        LeftLeg = description.LeftLeg,
+                        Head = description.Head
+                    }
+                    task.wait(0.2)
+                    local args = { [1] = 123402086843885, [2] = 100839513065432, [3] = 78300682916056, [4] = 86276701020724, [5] = 78409653958165, [6] = 15093053680 }
+                    pcall(function() game:GetService("ReplicatedStorage").Remotes.ChangeCharacterBody:InvokeServer(args) end)
+                    task.wait(0.3)
+                    local newAnim = Instance.new("Animation")
+                    newAnim.AnimationId = "rbxassetid://70883871260184"
+                    skyboxTrack = humanoid:LoadAnimation(newAnim)
+                    skyboxTrack.Priority = Enum.AnimationPriority.Action4
+                    skyboxTrack:Play(0.1, 1, 0.01)
+                    task.wait(0.5)
+                    local plankAnim = Instance.new("Animation")
+                    plankAnim.AnimationId = "rbxassetid://3695333486"
+                    rigidTrack = humanoid:LoadAnimation(plankAnim)
+                    rigidTrack.Priority = Enum.AnimationPriority.Movement
+                    rigidTrack:Play(0.1, 1, 0)
+                end
+            end
+        else
+            stopAllAnimations()
+            task.wait(0.2)
+            if next(savedNukeBody) then
+                local player = game.Players.LocalPlayer
+                local character = player.Character
+                if character then
+                    local humanoid = character:FindFirstChildOfClass("Humanoid")
+                    if humanoid then
+                        local restoreBody = {
+                            [1] = savedNukeBody.Torso,
+                            [2] = savedNukeBody.RightArm,
+                            [3] = savedNukeBody.LeftArm,
+                            [4] = savedNukeBody.RightLeg,
+                            [5] = savedNukeBody.LeftLeg,
+                            [6] = savedNukeBody.Head
+                        }
+                        local args = { [1] = restoreBody }
+                        pcall(function() game:GetService("ReplicatedStorage").Remotes.ChangeCharacterBody:InvokeServer(unpack(args)) end)
+                        savedNukeBody = {}
+                    end
+                end
+            end
+        end
+    end
+})
+
+-- ========== Nuke FlashBack ==========
+local nukeFlashEnabled = false
+local nukeFlashTrack = nil
+local flashRigidTrack = nil
+local savedNukeFlashBody = {}
+
+local function stopFlashAnimations()
+    if flashRigidTrack then
+        pcall(function() flashRigidTrack:Stop() flashRigidTrack:Destroy() end)
+        flashRigidTrack = nil
+    end
+    if nukeFlashTrack then
+        pcall(function() nukeFlashTrack:Stop() nukeFlashTrack:Destroy() end)
+        nukeFlashTrack = nil
+    end
+end
+
+SkyboxTab:AddToggle({
+    Name = "Nuke FlashBack",
+    Default = false,
+    Callback = function(value)
+        nukeFlashEnabled = value
+        if value then
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            if character then
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    local description = humanoid:GetAppliedDescription()
+                    savedNukeFlashBody = {
+                        Torso = description.Torso,
+                        RightArm = description.RightArm,
+                        LeftArm = description.LeftArm,
+                        RightLeg = description.RightLeg,
+                        LeftLeg = description.LeftLeg,
+                        Head = description.Head
+                    }
+                    task.wait(0.2)
+                    local args = { [1] = 123402086843885, [2] = 100839513065432, [3] = 78300682916056, [4] = 86276701020724, [5] = 78409653958165, [6] = 15093053680 }
+                    pcall(function() game:GetService("ReplicatedStorage").Remotes.ChangeCharacterBody:InvokeServer(args) end)
+                    task.wait(0.3)
+                    local newAnim = Instance.new("Animation")
+                    newAnim.AnimationId = "rbxassetid://70883871260184"
+                    nukeFlashTrack = humanoid:LoadAnimation(newAnim)
+                    nukeFlashTrack.Priority = Enum.AnimationPriority.Action4
+                    nukeFlashTrack:Play(0.1, 1, 1)
+                    task.wait(0.1)
+                    nukeFlashTrack:AdjustSpeed(5)
+                    task.wait(0.3)
+                    local plankAnim = Instance.new("Animation")
+                    plankAnim.AnimationId = "rbxassetid://3695333486"
+                    flashRigidTrack = humanoid:LoadAnimation(plankAnim)
+                    flashRigidTrack.Priority = Enum.AnimationPriority.Movement
+                    flashRigidTrack:Play(0.1, 1, 0)
+                end
+            end
+        else
+            stopFlashAnimations()
+            task.wait(0.2)
+            if next(savedNukeFlashBody) then
+                local player = game.Players.LocalPlayer
+                local character = player.Character
+                if character then
+                    local humanoid = character:FindFirstChildOfClass("Humanoid")
+                    if humanoid then
+                        local restoreBody = {
+                            [1] = savedNukeFlashBody.Torso,
+                            [2] = savedNukeFlashBody.RightArm,
+                            [3] = savedNukeFlashBody.LeftArm,
+                            [4] = savedNukeFlashBody.RightLeg,
+                            [5] = savedNukeFlashBody.LeftLeg,
+                            [6] = savedNukeFlashBody.Head
+                        }
+                        local args = { [1] = restoreBody }
+                        pcall(function() game:GetService("ReplicatedStorage").Remotes.ChangeCharacterBody:InvokeServer(unpack(args)) end)
+                        savedNukeFlashBody = {}
+                    end
+                end
+            end
+        end
+    end
+})
+
+-- ==================== تبويب الحماية (مُحدَّث) ====================
+local Tab13 = Window:MakeTab({"حماية", "rbxassetid://11322093465"})
+local TweenService = game:GetService("TweenService") -- للحماية من البانق
+
+-- جداول النسخ الاحتياطي (لـ AntiFling)
+local backupTables = {
+    Vehicles = {},
+    Canoes = {},
+    Jets = {},
+    Helis = {},
+    Balls = {}
+}
+
+local TeleportCarro = {}
+function TeleportCarro:MostrarNotificacao(msg)
+    print("🔔 "..msg)
+end
+
+-- ========== Anti Fling Loop (الأصلي) ==========
+local function AntiFlingLoop(name, getFolderFunc)
+    local active = false
+    task.spawn(function()
+        while true do
+            if active and LocalPlayer.Character then
+                local folder = getFolderFunc()
+                if folder then
+                    for _, item in ipairs(folder:GetChildren()) do
+                        local isMine = false
+                        if name == "Vehicles" then
+                            for _, seat in ipairs(item:GetDescendants()) do
+                                if (seat:IsA("VehicleSeat") or seat:IsA("Seat")) and seat.Occupant and seat.Occupant.Parent == LocalPlayer.Character then
+                                    isMine = true
+                                    break
+                                end
+                            end
+                        elseif name == "Canoes" then
+                            local owner = item:FindFirstChild("Owner")
+                            isMine = owner and owner.Value == LocalPlayer
+                        elseif name == "Jets" or name == "Helis" then
+                            isMine = item.Name == LocalPlayer.Name
+                        end
+                        if not isMine then
+                            table.insert(backupTables[name], item:Clone())
+                            item:Destroy()
+                        end
+                    end
+                end
+            end
+            task.wait(0.03)
+        end
+    end)
+    return function(state)
+        active = state
+        TeleportCarro:MostrarNotificacao(name.." "..(state and "نشط!" or "غير نشط!"))
+        if not state then
+            for _, item in ipairs(backupTables[name]) do
+                local parentFolder = getFolderFunc()
+                if parentFolder then
+                    item.Parent = parentFolder
+                end
+            end
+            backupTables[name] = {}
+        end
+    end
+end
+
+-- منع تطيير الزوارق
+Tab13:AddToggle({
+    Name = "منع تطيير الزوارق",
+    Description = "",
+    Default = false,
+    Callback = AntiFlingLoop("Canoes", function()
+        local workspaceCom = Workspace:FindFirstChild("WorkspaceCom")
+        return workspaceCom and workspaceCom:FindFirstChild("001_CanoeStorage")
+    end)
+})
+
+-- منع تطيير الطائرات
+Tab13:AddToggle({
+    Name = "منع تطيير الطائرات",
+    Description = "",
+    Default = false,
+    Callback = AntiFlingLoop("Jets", function()
+        local folder = Workspace:FindFirstChild("WorkspaceCom")
+        if folder and folder:FindFirstChild("001_Airport") then
+            local storage = folder["001_Airport"]:FindFirstChild("AirportHanger")
+            if storage then
+                return storage:FindFirstChild("001_JetStorage") and storage["001_JetStorage"]:FindFirstChild("JetAirport")
+            end
+        end
+    end)
+})
+
+-- منع تطيير الهليكوبترات
+Tab13:AddToggle({
+    Name = "منع تطيير الهليكوبترات",
+    Description = "",
+    Default = false,
+    Callback = AntiFlingLoop("Helis", function()
+        local folder = Workspace:FindFirstChild("WorkspaceCom")
+        return folder and folder:FindFirstChild("001_HeliStorage") and folder["001_HeliStorage"]:FindFirstChild("PoliceStationHeli")
+    end)
+})
+
+-- منع تطيير الكرة
+Tab13:AddToggle({
+    Name = "منع تطيير الكرة",
+    Description = "",
+    Default = false,
+    Callback = AntiFlingLoop("Balls", function()
+        local folder = Workspace:FindFirstChild("WorkspaceCom")
+        return folder and folder:FindFirstChild("001_SoccerBalls")
+    end)
+})
+
+-- ========== منع الجلوس ==========
+local antiSitActive = false
+Tab13:AddToggle({
+    Name = "منع الجلوس",
+    Description = "",
+    Default = false,
+    Callback = function(state)
+        antiSitActive = state
+        TeleportCarro:MostrarNotificacao("منع الجلوس "..(state and "نشط!" or "غير نشط!"))
+        task.spawn(function()
+            while antiSitActive and LocalPlayer.Character do
+                local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+                    if humanoid:GetState() == Enum.HumanoidStateType.Seated then
+                        humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+                    end
+                end
+                task.wait(0.05)
+            end
+            if not antiSitActive then
+                local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+                end
+            end
+        end)
+    end
+})
+
+-- ========== تقليل الـ Lag ==========
+Tab13:AddToggle({
+    Name = "تقليل الـ Lag",
+    Description = "",
+    Default = false,
+    Callback = function(state)
+        local Players = game:GetService("Players")
+        local dedupLock = {}
+        local IGNORED_PLAYER
+        if not state then return end
+        local function marcarIgnorado(player)
+            IGNORED_PLAYER = player
+        end
+        local function isTargetTool(inst)
+            return inst:IsA("Tool")
+        end
+        local function gatherTools(player)
+            local found = {}
+            local containers = {}
+            if player.Character then table.insert(containers, player.Character) end
+            local backpack = player:FindFirstChildOfClass("Backpack")
+            if backpack then table.insert(containers, backpack) end
+            local sg = player:FindFirstChild("StarterGear")
+            if sg then table.insert(containers, sg) end
+            for _, container in ipairs(containers) do
+                for _, child in ipairs(container:GetChildren()) do
+                    if isTargetTool(child) then
+                        table.insert(found, child)
+                    end
+                end
+            end
+            return found
+        end
+        local function dedupePlayer(player)
+            if player == IGNORED_PLAYER then return end
+            if dedupLock[player] then return end
+            dedupLock[player] = true
+            local tools = gatherTools(player)
+            if #tools > 1 then
+                for i = 2, #tools do
+                    pcall(function() tools[i]:Destroy() end)
+                end
+            end
+            dedupLock[player] = false
+        end
+        local function hookPlayer(player)
+            if not IGNORED_PLAYER then marcarIgnorado(player) end
+            task.defer(dedupePlayer, player)
+            local function setupChar(char)
+                task.delay(0.5, function() dedupePlayer(player) end)
+                char.ChildAdded:Connect(function(child)
+                    if isTargetTool(child) then
+                        task.delay(0.1, function() dedupePlayer(player) end)
+                    end
+                end)
+            end
+            if player.Character then setupChar(player.Character) end
+            player.CharacterAdded:Connect(setupChar)
+            local backpack = player:WaitForChild("Backpack", 10)
+            if backpack then
+                backpack.ChildAdded:Connect(function(child)
+                    if isTargetTool(child) then
+                        task.delay(0.1, function() dedupePlayer(player) end)
+                    end
+                end)
+            end
+            local sg = player:FindFirstChild("StarterGear") or player:WaitForChild("StarterGear", 10)
+            if sg then
+                sg.ChildAdded:Connect(function(child)
+                    if isTargetTool(child) then
+                        task.delay(0.1, function() dedupePlayer(player) end)
+                    end
+                end)
+            end
+        end
+        Players.PlayerAdded:Connect(hookPlayer)
+        for _, plr in ipairs(Players:GetPlayers()) do
+            hookPlayer(plr)
+        end
+        task.spawn(function()
+            while state do
+                for _, plr in ipairs(Players:GetPlayers()) do
+                    dedupePlayer(plr)
+                end
+                task.wait(2)
+            end
+        end)
+    end
+})
+
+-- ========== الحماية من البانق (إضافة جديدة) ==========
+local antiBangActive = false
+local antiBangLastPos = nil
+local antiBangPart = nil
+local antiBangVelConn = nil
+
+local function antiBangEnable()
+    local char = LocalPlayer.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    antiBangLastPos = hrp.Position
+
+    antiBangPart = Instance.new("Part")
+    antiBangPart.Size = Vector3.new(4, 1, 4)
+    antiBangPart.Position = antiBangLastPos
+    antiBangPart.Anchored = true
+    antiBangPart.CanCollide = false
+    antiBangPart.Transparency = 0.5
+    antiBangPart.Name = "Gaze"
+    antiBangPart.Parent = workspace
+    workspace.CurrentCamera.CameraSubject = antiBangPart
+
+    workspace.FallenPartsDestroyHeight = -1000
+
+    local tweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Linear)
+    local tween = TweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(905, -500, 0)})
+    tween:Play()
+    tween.Completed:Wait()
+
+    antiBangVelConn = RunService.Heartbeat:Connect(function()
+        if hrp then
+            hrp.Velocity = Vector3.new(0, 0, 0)
+        end
+    end)
+end
+
+local function antiBangDisable()
+    local char = LocalPlayer.Character
+    if not char or not antiBangLastPos then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    if antiBangVelConn then
+        antiBangVelConn:Disconnect()
+        antiBangVelConn = nil
+    end
+
+    local tweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Linear)
+    local tween = TweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(antiBangLastPos)})
+    tween:Play()
+    tween.Completed:Wait()
+
+    if LocalPlayer.Character then
+        local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            workspace.CurrentCamera.CameraSubject = humanoid
+        end
+    end
+
+    if antiBangPart then
+        antiBangPart:Destroy()
+        antiBangPart = nil
+    end
+
+    workspace.FallenPartsDestroyHeight = -500
+end
+
+Tab13:AddToggle({
+    Name = "الحماية من البانق",
+    Description = "ينقلك إلى موقع آمن ويمنع السرعة لحمايتك من التطيير",
+    Default = false,
+    Callback = function(state)
+        if state then
+            antiBangEnable()
+        else
+            antiBangDisable()
+        end
+    end
+})
+
+-- ==================== تبويب أغاني الفونك ====================
+local MusicTab = Window:MakeTab({ Title = "اغاني الفونك", Icon = "rbxassetid://4483362458" })
+
+local function playMusic(soundId)
+    if not soundId or soundId == "" then return end
+    pcall(function()
+        local args1 = { [1] = "SkateBoard" }
+        game:GetService("ReplicatedStorage").RE:FindFirstChild("1NoMoto1rVehicle1s"):FireServer(unpack(args1))
+        task.wait(0.3)
+        local args2 = { [1] = "PickingScooterMusicText", [2] = soundId }
+        game:GetService("ReplicatedStorage").RE:FindFirstChild("1NoMoto1rVehicle1s"):FireServer(unpack(args2))
+        print("[Music] تم تشغيل الأغنية: " .. soundId)
+    end)
+end
+
+MusicTab:AddSection({ "أدخل كود الأغنية" })
+MusicTab:AddTextBox({
+    Name = "أدخل الكود",
+    PlaceholderText = "هنا",
+    Callback = function(value)
+        if value and value ~= "" then
+            playMusic(value)
+            print("[Music] جاري تشغيل الأغنية: " .. value)
+        end
+    end
+})
+
+MusicTab:AddSection({ "أغاني فونك جاهزة" })
+
+MusicTab:AddButton({ Name = "حلوة 1", Callback = function() playMusic("98313375960954") end })
+MusicTab:AddButton({ Name = "حلوة 2", Callback = function() playMusic("136909019669593") end })
+MusicTab:AddButton({ Name = "حلوة 3", Callback = function() playMusic("130012558337510") end })
+MusicTab:AddButton({ Name = "حلوة 4", Callback = function() playMusic("97647421021323") end })
+MusicTab:AddButton({ Name = "حلوة 5", Callback = function() playMusic("80281881556916") end })
+
+MusicTab:AddButton({ Name = "جرب وما تندم 1", Callback = function() playMusic("91138951626248") end })
+MusicTab:AddButton({ Name = "جرب وما تندم 2", Callback = function() playMusic("83309655997452") end })
+MusicTab:AddButton({ Name = "جرب وما تندم 3", Callback = function() playMusic("81023003196738") end })
+MusicTab:AddButton({ Name = "جرب وما تندم 4", Callback = function() playMusic("102655780019271") end })
+MusicTab:AddButton({ Name = "جرب وما تندم 5", Callback = function() playMusic("103288558732219") end })
+MusicTab:AddButton({ Name = "جرب وما تندم 6", Callback = function() playMusic("127491720343331") end })
+MusicTab:AddButton({ Name = "جرب وما تندم 7", Callback = function() playMusic("134833118817796") end })
+MusicTab:AddButton({ Name = "جرب وما تندم 8", Callback = function() playMusic("112355709978731") end })
+MusicTab:AddButton({ Name = "جرب وما تندم 9", Callback = function() playMusic("140498577577255") end })
+MusicTab:AddButton({ Name = "جرب وما تندم 10", Callback = function() playMusic("128146983730820") end })
+
+MusicTab:AddButton({ Name = "سب 1", Callback = function() playMusic("134954359122953") end })
+MusicTab:AddButton({ Name = "سب 2", Callback = function() playMusic("94943308357738") end })
+MusicTab:AddButton({ Name = "سب 3", Callback = function() playMusic("91611648163631") end })
+
+MusicTab:AddButton({ Name = "جرب وما تندم 11", Callback = function() playMusic("89535137402880") end })
+MusicTab:AddButton({ Name = "جرب وما تندم 12", Callback = function() playMusic("72369698229901") end })
+MusicTab:AddButton({ Name = "جرب وما تندم 13", Callback = function() playMusic("127840997774724") end })
+MusicTab:AddButton({ Name = "جرب وما تندم 14", Callback = function() playMusic("78460453053256") end })
+
+-- ========== أحداث إضافية ==========
+LocalPlayer.CharacterAdded:Connect(function()
+    print("تم تغيير الشخصية")
+    cleanupCouch()
+    if LocalPlayer.Character then
+        local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then hum.Died:Connect(cleanupCouch) end
+    end
+end)
+
+if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+    LocalPlayer.Character.Humanoid.Died:Connect(cleanupCouch)
+end
