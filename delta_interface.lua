@@ -1457,7 +1457,7 @@ local WindowBackground = Create("ImageLabel", MainFrame, {
     Size = UDim2.new(1, 0, 1, 0),
     Position = UDim2.new(0, 0, 0, 0),
     BackgroundTransparency = 1,
-    Image = "rbxassetid://120940829042271",
+    Image = "rbxassetid://95284625090267",
     ImageTransparency = 0.1,
     ScaleType = Enum.ScaleType.Crop,
     ZIndex = 0
@@ -1495,8 +1495,9 @@ local GlowImage = Create("ImageLabel", MainFrame, {
     Position = UDim2.fromScale(0.5, 0.5),
     AnchorPoint = Vector2.new(0.5, 0.5),
     BackgroundTransparency = 1,
-    Image = "rbxassetid://76498282033632",
+    Image = "rbxassetid://139695422805747",
     ImageTransparency = 0,
+    ScaleType = Enum.ScaleType.Fit,
     ZIndex = 0
 })
 
@@ -1822,11 +1823,16 @@ end
 	end)
 
 	local ControlSize1, ControlSize2 = MakeDrag(Create("ImageButton", MainFrame, {
-		Size = UDim2.new(0, 35, 0, 35),
+		Size = UDim2.new(0, 44, 0, 44),
 		Position = MainFrame.Size,
 		Active = true,
-		AnchorPoint = Vector2.new(0.8, 0.8),
+		AnchorPoint = Vector2.new(1, 1),
 		BackgroundTransparency = 1,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		Image = "rbxassetid://139695422805747",
+		ImageTransparency = 0,
+		ScaleType = Enum.ScaleType.Fit,
+		ZIndex = 100,
 		Name = "Control Hub Size"
 	})), MakeDrag(Create("ImageButton", MainFrame, {
 		Size = UDim2.new(0, 20, 1, -30),
