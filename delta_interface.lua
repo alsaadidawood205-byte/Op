@@ -3699,6 +3699,30 @@ AutoApplyRotatingBorders(80)
 
 	return Window
 end
+
+local InterfaceWindow = redzlib:MakeWindow({
+	Name = "واجهة دلتا",
+	SubTitle = "واجهة جاهزة",
+	SaveFolder = "DeltaInterface"
+})
+
+local MainTab = InterfaceWindow:MakeTab({
+	Title = "الرئيسية",
+	Icon = "home"
+})
+
+MainTab:AddButton({
+	Name = "زر تجريبي",
+	Description = "يعمل عند الضغط",
+	Callback = function()
+		redzlib:Notify({
+			Title = "واجهة دلتا",
+			Text = "تم تشغيل الزر بنجاح",
+			Duration = 3
+		})
+	end
+})
+
 return redzlib
 
 -- SV LIB
