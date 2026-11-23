@@ -15,27 +15,27 @@ local redzlib = {
 Themes = {
     Darker = {
         ["Color Hub 1"] = ColorSequence.new({
-            ColorSequenceKeypoint.new(0.00, Color3.fromRGB(120, 0, 255)),
-            ColorSequenceKeypoint.new(0.50, Color3.fromRGB(90, 0, 200)),
-            ColorSequenceKeypoint.new(1.00, Color3.fromRGB(60, 0, 150))
+            ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 35, 55)),
+            ColorSequenceKeypoint.new(0.50, Color3.fromRGB(220, 20, 40)),
+            ColorSequenceKeypoint.new(1.00, Color3.fromRGB(150, 10, 25))
         }),
-        ["Color Hub 2"] = Color3.fromRGB(120, 0, 255),
-        ["Color Stroke"] = Color3.fromRGB(160, 100, 255),
+        ["Color Hub 2"] = Color3.fromRGB(255, 35, 55),
+        ["Color Stroke"] = Color3.fromRGB(255, 80, 95),
         ["Color Theme"] = Color3.fromRGB(15, 15, 15),
         ["Color Text"] = Color3.fromRGB(255, 255, 255),
-        ["Color Dark Text"] = Color3.fromRGB(180, 150, 255)
+        ["Color Dark Text"] = Color3.fromRGB(255, 150, 160)
     },
     Dark = {
         ["Color Hub 1"] = ColorSequence.new({
-            ColorSequenceKeypoint.new(0.00, Color3.fromRGB(130, 0, 255)),
-            ColorSequenceKeypoint.new(0.50, Color3.fromRGB(100, 0, 220)),
-            ColorSequenceKeypoint.new(1.00, Color3.fromRGB(130, 0, 255))
+            ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 40, 60)),
+            ColorSequenceKeypoint.new(0.50, Color3.fromRGB(230, 25, 45)),
+            ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 40, 60))
         }),
-        ["Color Hub 2"] = Color3.fromRGB(130, 0, 255),
-        ["Color Stroke"] = Color3.fromRGB(170, 120, 255),
+        ["Color Hub 2"] = Color3.fromRGB(255, 40, 60),
+        ["Color Stroke"] = Color3.fromRGB(255, 90, 105),
         ["Color Theme"] = Color3.fromRGB(10, 10, 10),
         ["Color Text"] = Color3.fromRGB(255, 255, 255),
-        ["Color Dark Text"] = Color3.fromRGB(190, 160, 255)
+        ["Color Dark Text"] = Color3.fromRGB(255, 155, 165)
     },
 },
 
@@ -3352,7 +3352,7 @@ end
     local Holder = Create("Frame", Container, {
         Size = UDim2.new(1,0,0,220),
         BackgroundColor3 = Color3.fromRGB(0,0,0),
-        BorderColor3 = Color3.fromRGB(170,0,255),
+        BorderColor3 = Color3.fromRGB(255,40,60),
         BorderSizePixel = 2
     })
 
@@ -3390,7 +3390,7 @@ end
         local Button = Create("TextButton", Holder, {
             Size = UDim2.new(0,70,0,28),
             Position = UDim2.new(Pos.X.Scale, Pos.X.Offset-5, 0, 150),
-            BackgroundColor3 = Color3.fromRGB(120,0,200),
+            BackgroundColor3 = Color3.fromRGB(220,20,40),
             Text = "Copy",
             Font = Enum.Font.GothamBold,
             TextSize = 14,
