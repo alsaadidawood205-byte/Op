@@ -943,7 +943,7 @@ local SetProps, SetChildren, InsertTheme, Create do
 		end
 	end
 
-	pcall(Save, "Nexus library V1.json")
+	pcall(Save, "SLANDER library V1.json")
 end
 
 local Funcs = {} do
@@ -1085,7 +1085,7 @@ local GetFlag, SetFlag, CheckFlag do
 end
 
 local ScreenGui = Create("ScreenGui", CoreGui, {
-	Name = "Nexus Library V1",
+	Name = "SLANDER Library V1",
 }, {
 	Create("UIScale", {
 		Scale = UIScale,
@@ -1388,7 +1388,7 @@ function redzlib:SetTheme(NewTheme)
 	if not VerifyTheme(NewTheme) then return end
 
 	redzlib.Save.Theme = NewTheme
-	SaveJson("Nexus library V1.json", redzlib.Save)  -- NEXUS
+	SaveJson("SLANDER library V1.json", redzlib.Save)
 	Theme = redzlib.Themes[NewTheme]
 
 	Comnection:FireConnection("ThemeChanged", NewTheme)
@@ -1417,8 +1417,8 @@ function redzlib:SetScale(NewScale)
 end
 
 function redzlib:MakeWindow(Configs)
-	local WTitle = Configs[1] or Configs.Name or Configs.Title or "redz Library V5"
-	local WMiniText = Configs[2] or Configs.SubTitle or "by : redz9999"
+	local WTitle = Configs[1] or Configs.Name or Configs.Title or "SLANDER Library"
+	local WMiniText = Configs[2] or Configs.SubTitle or "by SLANDER"
 
 	Settings.ScriptFile = Configs[3] or Configs.SaveFolder or false
 
@@ -1483,31 +1483,6 @@ local Components = Create("Folder", MainFrame, {
 local DropdownHolder = Create("Folder", ScreenGui, {
     Name = "Dropdown"
 })
-
-
-
-
-local RunService = game:GetService("RunService")
-
-local GlowImage = Create("ImageLabel", MainFrame, {
-    Name = "GlowCircle",
-    Size = UDim2.fromOffset(150, 150),
-    Position = UDim2.fromScale(0.5, 0.5),
-    AnchorPoint = Vector2.new(0.5, 0.5),
-    BackgroundTransparency = 1,
-    Image = "rbxassetid://97813436091467",
-    ImageTransparency = 0,
-    ScaleType = Enum.ScaleType.Fit,
-    ZIndex = 0
-})
-
-
-
-RunService.Heartbeat:Connect(function(deltaTime)
-    GlowImage.Rotation = GlowImage.Rotation + 90 * deltaTime -- 90 ثانيه
-end)
-
-
 
 
 
@@ -1702,126 +1677,6 @@ end)
 		Name = "Containers"
 	})
 
-local ParticleContainer = Create("Frame", Containers, {
-		Size = UDim2.new(1, 0, 1, 0),
-		BackgroundTransparency = 1,
-		Name = "ThemeParticles",
-		ZIndex = -5,
-		ClipsDescendants = true
-	})
-
-	local ParticleConfig = {
-		MaxParticles = 30,
-		SpawnRate = 0.1,
-		ParticleSize = {Min = 6, Max = 10},
-		ParticleSpeed = {Min = 15, Max = 25},
-		ParticleLifetime = 6
-	}
-
-local ActiveParticles = {}
-local LastSpawn = 0
-
-local function CreateCyberpunkParticle()
-	if #ActiveParticles >= ParticleConfig.MaxParticles then return end
-
-	local containerSize = ParticleContainer.AbsoluteSize
-	local startX = math.random(10, containerSize.X - 10)
-	local startY = containerSize.Y + 20
-
-	local size = math.random(ParticleConfig.ParticleSize.Min, ParticleConfig.ParticleSize.Max)
-	local speed = math.random(ParticleConfig.ParticleSpeed.Min, ParticleConfig.ParticleSpeed.Max)
-
-	local particleColor = Theme["Color Theme"]
-
-	local Particle = Create("Frame", ParticleContainer, {
-		Size = UDim2.fromOffset(size, size),
-		Position = UDim2.fromOffset(startX, startY),
-		BackgroundColor3 = particleColor,
-		BackgroundTransparency = 0.2,
-		BorderSizePixel = 0
-	})
-
-	Create("UICorner", Particle, {
-		CornerRadius = UDim.new(0.5, 0)
-	})
-
-	local Glow = Create("Frame", Particle, {
-		Size = UDim2.new(1, 6, 1, 6),
-		Position = UDim2.new(0.5, 0, 0.5, 0),
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		BackgroundColor3 = particleColor,
-		BackgroundTransparency = 0.7,
-		ZIndex = -1
-	})
-
-	Create("UICorner", Glow, {
-		CornerRadius = UDim.new(0.5, 0)
-	})
-
-	local ParticleData = {
-		Frame = Particle,
-		Glow = Glow,
-		StartTime = tick(),
-		Speed = speed,
-		Direction = Vector2.new(0, -speed),
-		OriginalColor = particleColor
-	}
-
-	Particle.BackgroundTransparency = 1
-	Glow.BackgroundTransparency = 1
-	CreateTween({Particle, "BackgroundTransparency", 0.2, 0.8})
-	CreateTween({Glow, "BackgroundTransparency", 0.7, 0.8})
-
-	table.insert(ActiveParticles, ParticleData)
-end
-
-local function UpdateCyberpunkParticles()
-	local containerSize = ParticleContainer.AbsoluteSize
-
-	for i = #ActiveParticles, 1, -1 do
-		local particle = ActiveParticles[i]
-		local elapsed = tick() - particle.StartTime
-		if elapsed >= ParticleConfig.ParticleLifetime or
-		   particle.Frame.Position.Y.Offset < -20 then
-
-			CreateTween({particle.Frame, "BackgroundTransparency", 1, 0.5})
-			CreateTween({particle.Glow, "BackgroundTransparency", 1, 0.5})
-
-			task.spawn(function()
-				task.wait(0.5)
-				if particle.Frame and particle.Frame.Parent then
-					particle.Frame:Destroy()
-				end
-			end)
-
-			table.remove(ActiveParticles, i)
-		else
-			local currentPos = particle.Frame.Position
-			local newY = currentPos.Y.Offset + particle.Direction.Y * 0.016
-
-			particle.Frame.Position = UDim2.fromOffset(currentPos.X.Offset, newY)
-			local lifeRatio = elapsed / ParticleConfig.ParticleLifetime
-			if lifeRatio > 0.8 then
-				local fadeAlpha = 0.2 * (1 - ((lifeRatio - 0.8) / 0.2))
-				particle.Frame.BackgroundTransparency = math.max(1 - fadeAlpha, 0.95)
-			end
-		end
-	end
-end
-
-local function SpawnCyberpunkSystem()
-	if tick() - LastSpawn >= ParticleConfig.SpawnRate and MainFrame.Visible then
-		CreateCyberpunkParticle()
-		LastSpawn = tick()
-	end
-end
-
-
-	local ParticleConnection = RunService.Heartbeat:Connect(function()
-		UpdateCyberpunkParticles()
-		SpawnCyberpunkSystem()
-	end)
-
 	local ControlSize1 = Create("ImageButton", MainFrame, {
 		Size = UDim2.new(0, 44, 0, 44),
 		Position = UDim2.new(1, -22, 1, -22),
@@ -1871,7 +1726,7 @@ end
 		if Resizing then
 			Resizing = false
 			redzlib.Save.UISize = {MainFrame.Size.X.Offset, MainFrame.Size.Y.Offset}
-			SaveJson("Nexus library V5.json", redzlib.Save)
+			SaveJson("SLANDER library V1.json", redzlib.Save)
 		end
 	end)
 
@@ -1889,13 +1744,13 @@ end
 	ConnectSave(ControlSize1, function()
 		if not Minimized then
 			redzlib.Save.UISize = {MainFrame.Size.X.Offset, MainFrame.Size.Y.Offset}
-			SaveJson("Nexus library V5.json", redzlib.Save)
+			SaveJson("SLANDER library V1.json", redzlib.Save)
 		end
 	end)
 
 	ConnectSave(ControlSize2, function()
 		redzlib.Save.TabSize = MainScroll.Size.X.Offset
-		SaveJson("Nexus library V5.json", redzlib.Save)
+		SaveJson("SLANDER library V1.json", redzlib.Save)
 	end)
 
 	local ButtonsFolder = Create("Folder", TopBar, {
@@ -3674,92 +3529,30 @@ end
 
 	CloseButton.Activated:Connect(Window.CloseBtn)
 	MinimizeButton.Activated:Connect(Window.MinimizeBtn)
-local function AutoApplyRotatingBorders(Speed)
-   Speed = Speed or 80
-
-   local function AddBorder(Target, Thickness)
-       if Target:FindFirstChildOfClass("UIStroke") then return end
-
-       local Stroke = Instance.new("UIStroke")
-       Stroke.Parent = Target
-       Stroke.Thickness = Thickness or 1.6
-       Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-       Stroke.Color = Color3.new(1, 1, 1)
-
-       local Gradient = Instance.new("UIGradient")
-       Gradient.Color = ColorSequence.new{
-           ColorSequenceKeypoint.new(0, Theme["Color Theme"]),
-           ColorSequenceKeypoint.new(0.5, Theme["Color Stroke"]),
-           ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
-       }
-       Gradient.Parent = Stroke
-
-       RunService.Heartbeat:Connect(function(dt)
-           Gradient.Rotation = (Gradient.Rotation + Speed * dt) % 360
-       end)
-
-       return Stroke
-   end
-
-   AddBorder(MainFrame, 2)
-
-   local function ScanElement(Element)
-       if Element:IsA("Frame") or Element:IsA("TextButton") or Element:IsA("ImageButton") then
-           local HasCorner = Element:FindFirstChildOfClass("UICorner")
-           local HasStroke = Element:FindFirstChildOfClass("UIStroke")
-
-           if HasCorner and not HasStroke then
-               local Thickness = 1.4
-               AddBorder(Element, Thickness)
-           end
-       end
-
-       for _, Child in ipairs(Element:GetChildren()) do
-           ScanElement(Child)
-       end
-   end
-
-   ScanElement(MainFrame)
-
-   MainFrame.DescendantAdded:Connect(function(NewElement)
-       task.wait(0.1)
-       if NewElement:IsA("Frame") or NewElement:IsA("TextButton") or NewElement:IsA("ImageButton") then
-           if NewElement:FindFirstChildOfClass("UICorner") and not NewElement:FindFirstChildOfClass("UIStroke") then
-               AddBorder(NewElement, 1.4)
-           end
-       end
-   end)
-end
-
-AutoApplyRotatingBorders(80)
-
 	return Window
 end
 
 local InterfaceWindow = redzlib:MakeWindow({
-	Name = "واجهة دلتا",
-	SubTitle = "واجهة جاهزة",
-	SaveFolder = "DeltaInterface"
+	Name = "SLANDER",
+	SubTitle = "by SLANDER",
+	SaveFolder = "SLANDER"
 })
 
 local MainTab = InterfaceWindow:MakeTab({
-	Title = "الرئيسية",
+	Title = "Main",
 	Icon = "home"
 })
 
 MainTab:AddButton({
-	Name = "زر تجريبي",
-	Description = "يعمل عند الضغط",
+	Name = "Test",
+	Description = "Ready",
 	Callback = function()
 		redzlib:Notify({
-			Title = "واجهة دلتا",
-			Text = "تم تشغيل الزر بنجاح",
+			Title = "SLANDER",
+			Text = "Successfully executed",
 			Duration = 3
 		})
 	end
 })
 
 return redzlib
-
--- SV LIB
--- by Shadow
