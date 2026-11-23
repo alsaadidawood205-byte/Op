@@ -1457,7 +1457,7 @@ local WindowBackground = Create("ImageLabel", MainFrame, {
     Size = UDim2.new(1, 0, 1, 0),
     Position = UDim2.new(0, 0, 0, 0),
     BackgroundTransparency = 1,
-    Image = "rbxassetid://95284625090267",
+    Image = "rbxassetid://104280168823225",
     ImageTransparency = 0.1,
     ScaleType = Enum.ScaleType.Crop,
     ZIndex = 0
@@ -1495,7 +1495,7 @@ local GlowImage = Create("ImageLabel", MainFrame, {
     Position = UDim2.fromScale(0.5, 0.5),
     AnchorPoint = Vector2.new(0.5, 0.5),
     BackgroundTransparency = 1,
-    Image = "rbxassetid://139695422805747",
+    Image = "rbxassetid://97813436091467",
     ImageTransparency = 0,
     ScaleType = Enum.ScaleType.Fit,
     ZIndex = 0
@@ -1822,19 +1822,20 @@ end
 		SpawnCyberpunkSystem()
 	end)
 
-	local ControlSize1, ControlSize2 = MakeDrag(Create("ImageButton", MainFrame, {
+	local ControlSize1 = Create("ImageButton", MainFrame, {
 		Size = UDim2.new(0, 44, 0, 44),
-		Position = MainFrame.Size,
+		Position = UDim2.new(1, -22, 1, -22),
 		Active = true,
-		AnchorPoint = Vector2.new(1, 1),
+		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundTransparency = 1,
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-		Image = "rbxassetid://139695422805747",
+		Image = "rbxassetid://97813436091467",
 		ImageTransparency = 0,
 		ScaleType = Enum.ScaleType.Fit,
 		ZIndex = 100,
 		Name = "Control Hub Size"
-	})), MakeDrag(Create("ImageButton", MainFrame, {
+	})
+
+	local ControlSize2 = MakeDrag(Create("ImageButton", MainFrame, {
 		Size = UDim2.new(0, 20, 1, -30),
 		Position = UDim2.new(0, MainScroll.Size.X.Offset, 1, 0),
 		AnchorPoint = Vector2.new(0.5, 1),
@@ -1843,18 +1844,47 @@ end
 		Name = "Control Tab Size"
 	}))
 
+	local Resizing = false
+	local ResizeStart, ResizeStartSize
+
+	ControlSize1.InputBegan:Connect(function(Input)
+		if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+			Resizing = true
+			ResizeStart = Input.Position
+			ResizeStartSize = MainFrame.Size
+		end
+	end)
+
+	ControlSize1.InputChanged:Connect(function(Input)
+		if Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch then
+			if Resizing then
+				local delta = Input.Position - ResizeStart
+				local scale = UIScale or 1
+				local width = math.clamp(ResizeStartSize.X.Offset + delta.X / scale, 430, 1000)
+				local height = math.clamp(ResizeStartSize.Y.Offset + delta.Y / scale, 200, 500)
+				MainFrame.Size = UDim2.fromOffset(width, height)
+			end
+		end
+	end)
+
+	ControlSize1.InputEnded:Connect(function()
+		if Resizing then
+			Resizing = false
+			redzlib.Save.UISize = {MainFrame.Size.X.Offset, MainFrame.Size.Y.Offset}
+			SaveJson("Nexus library V5.json", redzlib.Save)
+		end
+	end)
+
 	local function ControlSize()
-		local Pos1, Pos2 = ControlSize1.Position, ControlSize2.Position
-		ControlSize1.Position = UDim2.fromOffset(math.clamp(Pos1.X.Offset, 430, 1000), math.clamp(Pos1.Y.Offset, 200, 500))
+		local Pos2 = ControlSize2.Position
 		ControlSize2.Position = UDim2.new(0, math.clamp(Pos2.X.Offset, 135, 250), 1, 0)
 
 		MainScroll.Size = UDim2.new(0, ControlSize2.Position.X.Offset, 1, -TopBar.Size.Y.Offset)
 		Containers.Size = UDim2.new(1, -MainScroll.Size.X.Offset, 1, -TopBar.Size.Y.Offset)
-		MainFrame.Size = ControlSize1.Position
 	end
 
-	ControlSize1:GetPropertyChangedSignal("Position"):Connect(ControlSize)
 	ControlSize2:GetPropertyChangedSignal("Position"):Connect(ControlSize)
+	MainFrame:GetPropertyChangedSignal("Size"):Connect(ControlSize)
 
 	ConnectSave(ControlSize1, function()
 		if not Minimized then
