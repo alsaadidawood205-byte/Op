@@ -1156,39 +1156,45 @@ local function CreateTween(Configs)
 end
 
 local function MakeDrag(Instance)
-	task.spawn(function()
-		SetProps(Instance, {
-			Active = true,
-			AutoButtonColor = false
-		})
+	SetProps(Instance, {
+		Active = true,
+		AutoButtonColor = false
+	})
 
-		local DragStart, StartPos, InputOn
+	local Dragging, DragInput, DragStart, StartPos
 
-		local function Update(Input)
-			local delta = Input.Position - DragStart
-			local Position = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + delta.X / UIScale, StartPos.Y.Scale, StartPos.Y.Offset + delta.Y / UIScale)
-			-- Instance.Position = Position
-			CreateTween({Instance, "Position", Position, 0.35})
-		end
-
-		Instance.MouseButton1Down:Connect(function()
-			InputOn = true
-		end)
-
-		Instance.InputBegan:Connect(function(Input)
-			if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-				StartPos = Instance.Position
-				DragStart = Input.Position
-
-				while UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do RunService.Heartbeat:Wait()
-					if InputOn then
-						Update(Input)
-					end
+	Instance.InputBegan:Connect(function(Input)
+		if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+			Dragging = true
+			DragStart = Input.Position
+			StartPos = Instance.Position
+			Input.Changed:Connect(function()
+				if Input.UserInputState == Enum.UserInputState.End then
+					Dragging = false
 				end
-				InputOn = false
-			end
-		end)
+			end)
+		end
 	end)
+
+	Instance.InputChanged:Connect(function(Input)
+		if Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch then
+			DragInput = Input
+		end
+	end)
+
+	UserInputService.InputChanged:Connect(function(Input)
+		if not Dragging or Input ~= DragInput then return end
+
+		local delta = Input.Position - DragStart
+		local scale = UIScale or 1
+		Instance.Position = UDim2.new(
+			StartPos.X.Scale,
+			StartPos.X.Offset + delta.X / scale,
+			StartPos.Y.Scale,
+			StartPos.Y.Offset + delta.Y / scale
+		)
+	end)
+
 	return Instance
 end
 
@@ -1452,6 +1458,30 @@ local MainFrame = InsertTheme(Create("ImageButton", ScreenGui, {
     Name = "Hub"
 }), "Main")
 
+local AmbientGlow = Create("ImageLabel", ScreenGui, {
+	Name = "RedAmbientGlow",
+	AnchorPoint = Vector2.new(0.5, 0.5),
+	BackgroundTransparency = 1,
+	Image = "rbxassetid://5028857084",
+	ImageColor3 = Color3.fromRGB(255, 25, 40),
+	ImageTransparency = 0.3,
+	ScaleType = Enum.ScaleType.Stretch,
+	ZIndex = 0
+})
+
+local function UpdateAmbientGlow()
+	local size = MainFrame.AbsoluteSize
+	local center = MainFrame.AbsolutePosition + size / 2
+	AmbientGlow.Position = UDim2.fromOffset(center.X, center.Y)
+	AmbientGlow.Size = UDim2.fromOffset(size.X + 72, size.Y + 72)
+	AmbientGlow.Visible = MainFrame.Visible
+end
+
+MainFrame:GetPropertyChangedSignal("AbsolutePosition"):Connect(UpdateAmbientGlow)
+MainFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(UpdateAmbientGlow)
+MainFrame:GetPropertyChangedSignal("Visible"):Connect(UpdateAmbientGlow)
+task.defer(UpdateAmbientGlow)
+
 local WindowBackground = Create("ImageLabel", MainFrame, {
     Name = "WindowBackground",
     Size = UDim2.new(1, 0, 1, 0),
@@ -1465,16 +1495,62 @@ local WindowBackground = Create("ImageLabel", MainFrame, {
 
 Make("Corner", WindowBackground)
 
-
-
-
-
 Make("Gradient", MainFrame, {
     Rotation = 45
 })
 MakeDrag(MainFrame)
 
 local MainCorner = Make("Corner", MainFrame)
+
+local RotatingGradients = {}
+
+local function AddRotatingBorder(Target, Thickness)
+    if not (Target:IsA("Frame") or Target:IsA("TextButton") or Target:IsA("ImageButton")) then return end
+    if not Target:FindFirstChildOfClass("UICorner") or Target:FindFirstChildOfClass("UIStroke") then return end
+
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Thickness = Thickness or 1.5
+    Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    Stroke.Color = Color3.fromRGB(255, 65, 75)
+    Stroke.Parent = Target
+
+    local Gradient = Instance.new("UIGradient")
+	Gradient.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(110, 0, 10)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 55, 65)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(110, 0, 10))
+	})
+    Gradient.Parent = Stroke
+    table.insert(RotatingGradients, Gradient)
+end
+
+local function ScanForRotatingBorders(Parent)
+	for _, Element in ipairs(Parent:GetChildren()) do
+		AddRotatingBorder(Element)
+		ScanForRotatingBorders(Element)
+	end
+end
+
+AddRotatingBorder(MainFrame, 2)
+ScanForRotatingBorders(MainFrame)
+MainFrame.DescendantAdded:Connect(function(Element)
+	task.delay(0.1, function()
+		if Element.Parent then
+			AddRotatingBorder(Element)
+		end
+	end)
+end)
+
+RunService.Heartbeat:Connect(function(DeltaTime)
+	for Index = #RotatingGradients, 1, -1 do
+		local Gradient = RotatingGradients[Index]
+		if Gradient.Parent then
+			Gradient.Rotation = (Gradient.Rotation + 60 * DeltaTime) % 360
+		else
+			table.remove(RotatingGradients, Index)
+		end
+	end
+end)
 
 local Components = Create("Folder", MainFrame, {
     Name = "Components"
@@ -1505,7 +1581,7 @@ local SizeButton = Create("TextButton", MainFrame, {
     Size = UDim2.fromOffset(25, 25),
     Position = UDim2.new(1, -70, 0, -6),
     BackgroundTransparency = 1,
-    Text = "♡",
+    Text = "+",
     TextSize = 18,
     Font = Enum.Font.GothamBold,
     TextColor3 = Color3.fromRGB(255,255,255),
@@ -1677,14 +1753,65 @@ end)
 		Name = "Containers"
 	})
 
+	local ActiveParticles = {}
+	local ParticleSpawnElapsed = 0
+	local ParticleColors = {
+		Color3.fromRGB(255, 45, 55),
+		Color3.fromRGB(200, 15, 25),
+		Color3.fromRGB(255, 105, 105)
+	}
+
+	local ParticleConnection = RunService.Heartbeat:Connect(function(DeltaTime)
+		if MainFrame.Visible then
+			ParticleSpawnElapsed = ParticleSpawnElapsed + DeltaTime
+			if ParticleSpawnElapsed >= 0.18 and #ActiveParticles < 16 and Containers.AbsoluteSize.X > 10 then
+				ParticleSpawnElapsed = 0
+				local Size = math.random(2, 4)
+				local Particle = Create("Frame", Containers, {
+					Size = UDim2.fromOffset(Size, Size),
+					Position = UDim2.fromOffset(math.random(4, math.max(5, Containers.AbsoluteSize.X - 4)), Containers.AbsoluteSize.Y),
+					BackgroundColor3 = ParticleColors[math.random(1, #ParticleColors)],
+					BackgroundTransparency = 0.25,
+					BorderSizePixel = 0,
+					ZIndex = 1
+				})
+				Create("UICorner", Particle, {CornerRadius = UDim.new(1, 0)})
+				table.insert(ActiveParticles, {
+					Frame = Particle,
+					Age = 0,
+					Lifetime = math.random(3, 5),
+					Speed = math.random(12, 24)
+				})
+			end
+		end
+
+		for Index = #ActiveParticles, 1, -1 do
+			local Particle = ActiveParticles[Index]
+			Particle.Age = Particle.Age + DeltaTime
+			if Particle.Age >= Particle.Lifetime or not Particle.Frame.Parent then
+				if Particle.Frame.Parent then
+					Particle.Frame:Destroy()
+				end
+				table.remove(ActiveParticles, Index)
+			else
+				local Position = Particle.Frame.Position
+				Particle.Frame.Position = UDim2.fromOffset(
+					Position.X.Offset,
+					Position.Y.Offset - Particle.Speed * DeltaTime
+				)
+				Particle.Frame.BackgroundTransparency = 0.25 + 0.65 * (Particle.Age / Particle.Lifetime)
+			end
+		end
+	end)
+
 	local ControlSize1 = Create("ImageButton", MainFrame, {
 		Size = UDim2.new(0, 44, 0, 44),
 		Position = UDim2.new(1, -22, 1, -22),
 		Active = true,
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundTransparency = 1,
-		Image = "rbxassetid://97813436091467",
-		ImageTransparency = 0,
+		Image = "",
+		ImageTransparency = 1,
 		ScaleType = Enum.ScaleType.Fit,
 		ZIndex = 100,
 		Name = "Control Hub Size"
@@ -1701,29 +1828,34 @@ end)
 
 	local Resizing = false
 	local ResizeStart, ResizeStartSize
+	local ResizeInputType
 
 	ControlSize1.InputBegan:Connect(function(Input)
 		if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
 			Resizing = true
 			ResizeStart = Input.Position
 			ResizeStartSize = MainFrame.Size
+			ResizeInputType = Input.UserInputType
 		end
 	end)
 
-	ControlSize1.InputChanged:Connect(function(Input)
-		if Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch then
-			if Resizing then
-				local delta = Input.Position - ResizeStart
-				local scale = UIScale or 1
-				local width = math.clamp(ResizeStartSize.X.Offset + delta.X / scale, 430, 1000)
-				local height = math.clamp(ResizeStartSize.Y.Offset + delta.Y / scale, 200, 500)
-				MainFrame.Size = UDim2.fromOffset(width, height)
-			end
+	UserInputService.InputChanged:Connect(function(Input)
+		if not Resizing then return end
+		local IsDragInput = (ResizeInputType == Enum.UserInputType.MouseButton1 and Input.UserInputType == Enum.UserInputType.MouseMovement)
+			or (ResizeInputType == Enum.UserInputType.Touch and Input.UserInputType == Enum.UserInputType.Touch)
+		if IsDragInput then
+			local delta = Input.Position - ResizeStart
+			local scale = UIScale or 1
+			local width = math.clamp(ResizeStartSize.X.Offset + delta.X / scale, 430, 1000)
+			local height = math.clamp(ResizeStartSize.Y.Offset + delta.Y / scale, 200, 500)
+			MainFrame.Size = UDim2.fromOffset(width, height)
 		end
 	end)
 
-	ControlSize1.InputEnded:Connect(function()
-		if Resizing then
+	UserInputService.InputEnded:Connect(function(Input)
+		local IsResizeEnd = (ResizeInputType == Enum.UserInputType.MouseButton1 and Input.UserInputType == Enum.UserInputType.MouseButton1)
+			or (ResizeInputType == Enum.UserInputType.Touch and Input.UserInputType == Enum.UserInputType.Touch)
+		if Resizing and IsResizeEnd then
 			Resizing = false
 			redzlib.Save.UISize = {MainFrame.Size.X.Offset, MainFrame.Size.Y.Offset}
 			SaveJson("SLANDER library V1.json", redzlib.Save)
