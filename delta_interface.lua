@@ -1502,56 +1502,6 @@ MakeDrag(MainFrame)
 
 local MainCorner = Make("Corner", MainFrame)
 
-local RotatingGradients = {}
-
-local function AddRotatingBorder(Target, Thickness)
-    if not (Target:IsA("Frame") or Target:IsA("TextButton") or Target:IsA("ImageButton")) then return end
-    if not Target:FindFirstChildOfClass("UICorner") or Target:FindFirstChildOfClass("UIStroke") then return end
-
-    local Stroke = Instance.new("UIStroke")
-    Stroke.Thickness = Thickness or 1.5
-    Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    Stroke.Color = Color3.fromRGB(255, 65, 75)
-    Stroke.Parent = Target
-
-    local Gradient = Instance.new("UIGradient")
-	Gradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(110, 0, 10)),
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 55, 65)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(110, 0, 10))
-	})
-    Gradient.Parent = Stroke
-    table.insert(RotatingGradients, Gradient)
-end
-
-local function ScanForRotatingBorders(Parent)
-	for _, Element in ipairs(Parent:GetChildren()) do
-		AddRotatingBorder(Element)
-		ScanForRotatingBorders(Element)
-	end
-end
-
-AddRotatingBorder(MainFrame, 2)
-ScanForRotatingBorders(MainFrame)
-MainFrame.DescendantAdded:Connect(function(Element)
-	task.delay(0.1, function()
-		if Element.Parent then
-			AddRotatingBorder(Element)
-		end
-	end)
-end)
-
-RunService.Heartbeat:Connect(function(DeltaTime)
-	for Index = #RotatingGradients, 1, -1 do
-		local Gradient = RotatingGradients[Index]
-		if Gradient.Parent then
-			Gradient.Rotation = (Gradient.Rotation + 60 * DeltaTime) % 360
-		else
-			table.remove(RotatingGradients, Index)
-		end
-	end
-end)
-
 local Components = Create("Folder", MainFrame, {
     Name = "Components"
 })
