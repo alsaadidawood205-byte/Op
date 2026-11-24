@@ -503,7 +503,8 @@ local function ButtonFrame(Instance, Title, Description, HolderSize)
 		BackgroundTransparency = 1,
 		TextTruncate = "AtEnd",
 		TextSize = 10,
-		TextXAlignment = "Left",
+		TextXAlignment = Settings.RightToLeft and Enum.TextXAlignment.Right or Enum.TextXAlignment.Left,
+		TextDirection = Settings.RightToLeft and Enum.TextDirection.RightToLeft or Enum.TextDirection.Automatic,
 		Text = "",
 		RichText = true
 	}), "Text")
@@ -517,7 +518,8 @@ local function ButtonFrame(Instance, Title, Description, HolderSize)
 		BackgroundTransparency = 1,
 		TextWrapped = true,
 		TextSize = 8,
-		TextXAlignment = "Left",
+		TextXAlignment = Settings.RightToLeft and Enum.TextXAlignment.Right or Enum.TextXAlignment.Left,
+		TextDirection = Settings.RightToLeft and Enum.TextDirection.RightToLeft or Enum.TextDirection.Automatic,
 		Text = "",
 		RichText = true
 	}), "DarkText")
@@ -589,7 +591,23 @@ local function GetColor(Instance)
 end
 
 -- /////////// --
+local function NormalizeImageAsset(Image)
+	if type(Image) == "number" then
+		return "rbxassetid://" .. tostring(Image)
+	end
+	if type(Image) ~= "string" then
+		return Image
+	end
+
+	Image = Image:gsub("^%s+", ""):gsub("%s+$", "")
+	if Image:match("^%d+$") then
+		return "rbxassetid://" .. Image
+	end
+	return Image
+end
+
 function redzlib:GetIcon(index)
+	index = NormalizeImageAsset(index)
 	if type(index) ~= "string" or index:find("rbxassetid://") or #index == 0 then
 		return index
 	end
@@ -776,6 +794,8 @@ end
 function redzlib:MakeWindow(Configs)
 	local WTitle = Configs[1] or Configs.Name or Configs.Title or "redz Library V5"
 	local WMiniText = Configs[2] or Configs.SubTitle or "by : redz9999"
+	local TabStyle = Configs.TabStyle or {}
+	Settings.RightToLeft = Configs.RightToLeft == true
 	
 	Settings.ScriptFile = Configs[3] or Configs.SaveFolder or false
 	
@@ -881,7 +901,8 @@ local CornerLogo = Create("ImageLabel", TopBar, {
 		AnchorPoint = Vector2.new(0, 0.5),
 		AutomaticSize = "XY",
 		Text = WTitle,
-		TextXAlignment = "Left",
+		TextXAlignment = Settings.RightToLeft and Enum.TextXAlignment.Right or Enum.TextXAlignment.Left,
+		TextDirection = Settings.RightToLeft and Enum.TextDirection.RightToLeft or Enum.TextDirection.Automatic,
 		TextSize = 12,
 		TextColor3 = Theme["Color Text"],
 		BackgroundTransparency = 1,
@@ -896,7 +917,8 @@ local CornerLogo = Create("ImageLabel", TopBar, {
 			Text = WMiniText,
 			TextColor3 = Theme["Color Dark Greem"],
 			BackgroundTransparency = 1,
-			TextXAlignment = "Left",
+			TextXAlignment = Settings.RightToLeft and Enum.TextXAlignment.Right or Enum.TextXAlignment.Left,
+			TextDirection = Settings.RightToLeft and Enum.TextDirection.RightToLeft or Enum.TextDirection.Automatic,
 			TextYAlignment = "Bottom",
 			TextSize = 9,
 			Font = Enum.Font.Gotham,
@@ -1308,6 +1330,14 @@ local CornerLogo = Create("ImageLabel", TopBar, {
 	
 	local Minimized, SaveSize, WaitClick
 	local Window, FirstTab = {}, false
+
+	function Window:SetTabStyle(Style)
+		if type(Style) ~= "table" then
+			error("Tab style must be a table", 2)
+		end
+		TabStyle = Style
+		return Window
+	end
 
 	-- ══════════════════════════════════════════
 	--  لوحة الإعدادات (كل الخصائص ظاهرة + إطار أبيض دوار + حجم أصغر 30%)
@@ -2192,33 +2222,43 @@ local CornerLogo = Create("ImageLabel", TopBar, {
 		if type(paste) == "table" then Configs = paste end
 		local TName = Configs[1] or Configs.Title or "Tab!"
 		local TIcon = Configs[2] or Configs.Icon or ""
+		local Style = Configs.Style or TabStyle
+		local IsRTL = Configs.RightToLeft == true or Settings.RightToLeft
+		local TabHeight = math.clamp(tonumber(Style.Height) or 24, 20, 52)
+		local TabCornerRadius = math.clamp(tonumber(Style.CornerRadius) or 7, 0, 20)
+		local TabTextSize = math.clamp(tonumber(Style.TextSize) or 10, 8, 18)
+		local TabIconSize = math.clamp(tonumber(Style.IconSize) or 13, 10, 24)
 		
 		TIcon = redzlib:GetIcon(TIcon)
-		if not TIcon:find("rbxassetid://") or TIcon:gsub("rbxassetid://", ""):len() < 6 then
+		if type(TIcon) ~= "string"
+			or (not TIcon:find("rbxassetid://", 1, true) and not TIcon:match("^https?://"))
+			or (TIcon:find("rbxassetid://", 1, true) and TIcon:gsub("rbxassetid://", ""):len() < 6) then
 			TIcon = false
 		end
 		
 		local TabSelect = Make("Button", MainScroll, {
-			Size = UDim2.new(1, 0, 0, 24)
-		})Make("Corner", TabSelect)
+			Size = UDim2.new(1, 0, 0, TabHeight)
+		})
+		Make("Corner", TabSelect, UDim.new(0, TabCornerRadius))
 		
 		local LabelTitle = InsertTheme(Create("TextLabel", TabSelect, {
 			Size = UDim2.new(1, TIcon and -25 or -15, 1),
-			Position = UDim2.fromOffset(TIcon and 25 or 15),
+			Position = UDim2.fromOffset(IsRTL and 10 or (TIcon and 25 or 15), 0),
 			BackgroundTransparency = 1,
 			Font = Enum.Font.BuilderSansBold,
 			Text = TName,
 			TextColor3 = Theme["Color Text"],
-			TextSize = 10,
-			TextXAlignment = Enum.TextXAlignment.Left,
+			TextSize = TabTextSize,
+			TextXAlignment = IsRTL and Enum.TextXAlignment.Right or Enum.TextXAlignment.Left,
+			TextDirection = IsRTL and Enum.TextDirection.RightToLeft or Enum.TextDirection.Automatic,
 			TextTransparency = (FirstTab and 0.3) or 0,
 			TextTruncate = "AtEnd"
 		}), "Text")
 		
 		local LabelIcon = InsertTheme(Create("ImageLabel", TabSelect, {
-			Position = UDim2.new(0, 8, 0.5),
-			Size = UDim2.new(0, 13, 0, 13),
-			AnchorPoint = Vector2.new(0, 0.5),
+			Position = UDim2.new(IsRTL and 1 or 0, IsRTL and -8 or 8, 0.5),
+			Size = UDim2.new(0, TabIconSize, 0, TabIconSize),
+			AnchorPoint = Vector2.new(IsRTL and 1 or 0, 0.5),
 			Image = TIcon or "",
 			BackgroundTransparency = 1,
 			ImageTransparency = (FirstTab and 0.3) or 0
@@ -2226,8 +2266,8 @@ local CornerLogo = Create("ImageLabel", TopBar, {
 		
 		local Selected = InsertTheme(Create("Frame", TabSelect, {
 			Size = FirstTab and UDim2.new(0, 4, 0, 4) or UDim2.new(0, 4, 0, 13),
-			Position = UDim2.new(0, 1, 0.5),
-			AnchorPoint = Vector2.new(0, 0.5),
+			Position = UDim2.new(IsRTL and 1 or 0, IsRTL and -1 or 1, 0.5),
+			AnchorPoint = Vector2.new(IsRTL and 1 or 0, 0.5),
 			BackgroundColor3 = Theme["Color Theme"],
 			BackgroundTransparency = FirstTab and 1 or 0
 		}), "Theme")Make("Corner", Selected, UDim.new(0.5, 0))
@@ -2338,7 +2378,7 @@ local CornerLogo = Create("ImageLabel", TopBar, {
 		end
 
 		function Tab:AddImage(Configs)
-			local ImageURL  = Configs[1] or Configs.Image or Configs.URL or ""
+			local ImageURL  = NormalizeImageAsset(Configs[1] or Configs.Image or Configs.URL or "")
 			local ImageSize = Configs[2] or Configs.Size or 80
 
 			local ImageHolder = Create("Frame", Container, {
@@ -2362,6 +2402,7 @@ local CornerLogo = Create("ImageLabel", TopBar, {
 			end
 			function Image:Destroy() ImageHolder:Destroy() end
 			function Image:Set(NewURL)
+				NewURL = NormalizeImageAsset(NewURL)
 				if type(NewURL) == "string" then ImageLabel.Image = NewURL end
 			end
 			function Image:SetSize(NewSize)
